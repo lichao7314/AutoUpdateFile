@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.example.autoupdatefile.Log.SystemLog;
-import com.example.autoupdatefile.file.FileCommon;
+import com.example.autoupdatefile.file.FileCommonLib;
 import com.example.autoupdatefile.file.FileCompare;
 import com.example.autoupdatefile.ui.MessageDialog;
 import com.example.autoupdatefile.vnc.VNCManager;
@@ -42,7 +42,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	FileUpdateThread updateThread = new FileUpdateThread();
+	CheckTaskThread updateThread = new CheckTaskThread();
 
 	TextView serverState = null;
 
@@ -51,9 +51,9 @@ public class MainActivity extends Activity {
 	Button stopBtn = null;
 
 	int count = 0;
- 
-	boolean isRun=false;
-	
+
+	boolean isRun = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -85,10 +85,10 @@ public class MainActivity extends Activity {
 						// TODO Auto-generated method stub
 						try {
 							AddLog("手动强制替换libauthjni_old和libauthjni文件", true);
-							MainActivity.this.isRun=true;
+							MainActivity.this.isRun = true;
 							CopyLibauthjniFile();
 							Restart12306();
-							
+
 						} catch (IOException e1) {
 							// TODO Auto-generated catch block
 							AddLog("ROOT权限失败", true);
@@ -115,20 +115,20 @@ public class MainActivity extends Activity {
 				new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						MainActivity.this.isRun=true;
+						MainActivity.this.isRun = true;
 						AddLog("正在生成servcfg.txt文件", true);
 						BulidServcfgFile();
 						AddLog("生成servcfg.txt成功", true);
 						try {
-							FileCommon.CopyFile(FileCommon.GetSDRoot()
+							FileCommonLib.CopyFile(FileCommonLib.GetSDRoot()
 									+ "/fangbian/servcfg.txt",
-									FileCommon.GetServcfgPath());
+									FileCommonLib.GetServcfgPath());
 
 							AddLog("替换servcfg.txt成功", true);
 							try {
 								Runtime.getRuntime().exec(
 										"chmod 666 "
-												+ FileCommon.GetServcfgPath());
+												+ FileCommonLib.GetServcfgPath());
 								AddLog("提升servcfg.txt权限成功", true);
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -145,23 +145,32 @@ public class MainActivity extends Activity {
 	}
 
 	/**
+	 * 销毁主界面后需要停止更新线程
+	 */
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		Stop();
+		super.onDestroy();
+	}
+
+	/**
 	 * 初始化
 	 */
 	private void Init() {
-		String path = FileCommon.GetSDRoot() + "/fangbian/";
+		String path = FileCommonLib.GetSDRoot() + "/fangbian/";
 		File fi = new File(path);
 		if (fi.exists() && fi.isFile()) {
 			fi.delete();
 		}
 
-		path = FileCommon.GetSDRoot() + "/fangbian";
+		path = FileCommonLib.GetSDRoot() + "/fangbian";
 		fi = new File(path);
 		if (!fi.exists()) {
 			fi.mkdirs();
 		}
 
-		
-		path = FileCommon.GetFilesDir(this) + "/smartvncserver";
+		path = FileCommonLib.GetFilesDir(this) + "/smartvncserver";
 		fi = new File(path);
 		if (fi.exists() && fi.isDirectory()) {
 			fi.delete();
@@ -170,11 +179,11 @@ public class MainActivity extends Activity {
 		fi = new File(path);
 
 		if (!fi.exists()) {
-			String tempFile = FileCommon.GetSDRoot()
+			String tempFile = FileCommonLib.GetSDRoot()
 					+ "/fangbian/smartvncserver";
-			this.CopyBinary(R.raw.smartvncserver, tempFile);
+			FileCommonLib.CopyBinary(R.raw.smartvncserver, tempFile, this);
 			try {
-				FileCommon.CopyFile(tempFile, path);
+				FileCommonLib.CopyFile(tempFile, path);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -184,23 +193,23 @@ public class MainActivity extends Activity {
 		VNCManager vnc = new VNCManager();
 		vnc.Start(this);
 
-		if (!FileCommon.ExistFile(path)) {
+		if (!FileCommonLib.ExistFile(path)) {
 			File from = new File(path);
 			from.mkdir();
 		}
 
-		path = FileCommon.GetSDRoot() + "/fangbian/log/";
-		if (!FileCommon.ExistFile(path)) {
+		path = FileCommonLib.GetSDRoot() + "/fangbian/log/";
+		if (!FileCommonLib.ExistFile(path)) {
 			File from = new File(path);
 			from.mkdir();
 		}
-		path = FileCommon.GetSDRoot() + "/fangbian/servcfg.txt";
+		path = FileCommonLib.GetSDRoot() + "/fangbian/servcfg.txt";
 
-		if (!FileCommon.ExistFile(path)) {
+		if (!FileCommonLib.ExistFile(path)) {
 			try {
 				BulidServcfgFile();
-				FileCommon.CopyFile(FileCommon.GetSDRoot()
-						+ "/fangbian/servcfg.txt", FileCommon.GetServcfgPath());
+				FileCommonLib.CopyFile(FileCommonLib.GetSDRoot()
+						+ "/fangbian/servcfg.txt", FileCommonLib.GetServcfgPath());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -237,10 +246,10 @@ public class MainActivity extends Activity {
 	}
 
 	/**
-	 * 生成servcfg文件
+	 * 生成servcfg配置文件
 	 */
 	private void BulidServcfgFile() {
-		String path = FileCommon.GetSDRoot() + "/fangbian/servcfg.txt";
+		String path = FileCommonLib.GetSDRoot() + "/fangbian/servcfg.txt";
 		File from = new File(path);
 		try {
 			from.createNewFile();
@@ -266,15 +275,46 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		Stop();
-		super.onDestroy();
+	/**
+	 * 复制替换Libauthjni文件（核心文件为）
+	 * 
+	 * @throws IOException
+	 */
+	private void CopyLibauthjniFile() throws IOException {
+
+		try {
+			Runtime.getRuntime().exec(
+					"chmod 777 " + FileCommonLib.GetOldFileName());
+			AddLog("提升libauthjni.so权限成功", true);
+
+			AddLog("更新libauthjni.so文件完成", true);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		FileCommonLib.CopyFile(FileCommonLib.Getlibauthjni_oldName(),
+				FileCommonLib.GetCopyFileName());
+		AddLog("备份libauthjni.so文件副本到libauthjni_old.so完成", true);
+
+		FileCommonLib.CopyFile(FileCommonLib.GetlibauthjniName(),
+				FileCommonLib.GetOldFileName());
+
 	}
 
- 
+	/**
+	 * 添加日志不记录文件中
+	 * @param log 日志信息
+	 */
+	public void AddLog(String log) {
+		AddLog(log, false);
+	}
 
+	/**
+	 * 添加日志
+	 * @param log 日志信息
+	 * @param isWrite 是否写入文件
+	 */
 	@SuppressLint("ResourceAsColor")
 	public void AddLog(String log, boolean isWrite) {
 		LinearLayout panel = (LinearLayout) this.findViewById(R.id.panel);
@@ -304,15 +344,16 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	public void AddLog(String log) {
-		AddLog(log, false);
-	}
-
+	/**
+	 * 启动更新服务线程
+	 */
 	private void Start() {
 		serverState.setText("服务状态:启动");
 		AddLog("正在扫描安装包中的libauthjni文件");
-		CopyBinary(R.raw.libauthjni, FileCommon.GetlibauthjniName());
-		CopyBinary(R.raw.libauthjni_old, FileCommon.Getlibauthjni_oldName());
+		FileCommonLib.CopyBinary(R.raw.libauthjni, FileCommonLib.GetlibauthjniName(),
+				this);
+		FileCommonLib.CopyBinary(R.raw.libauthjni_old,
+				FileCommonLib.Getlibauthjni_oldName(), this);
 		AddLog("libauthjni文件替换成功");
 		AddLog("执行服务");
 
@@ -328,40 +369,17 @@ public class MainActivity extends Activity {
 		stopBtn.setEnabled(true);
 	}
 
+	/**
+	 * 停止更新服务线程
+	 */
 	private void Stop() {
 		serverState.setText("服务状态:正在停止....");
 		updateThread.setRun(false);
 	}
 
 	/**
-	 * 从raw目录复制文件到对应的路径中
-	 * 
-	 * @param id
-	 * @param path
-	 * @return
+	 * 根据不同的消息执行具体的方法
 	 */
-	public boolean CopyBinary(int id, String path) {
-		try {
-
-			InputStream ins = this.getApplication().getResources()
-					.openRawResource(id);
-			int size = ins.available();
-
-			// Read the entire resource into a local byte buffer.
-			byte[] buffer = new byte[size];
-			ins.read(buffer);
-			ins.close();
-
-			FileOutputStream fos = new FileOutputStream(path);
-			fos.write(buffer);
-			fos.close();
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-
-	}
-
 	public Handler excuteUpdateHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -371,20 +389,18 @@ public class MainActivity extends Activity {
 				stopBtn.setEnabled(false);
 			}
 
-			if (msg.what == 1103) 
-			{ 
+			if (msg.what == 1103) {
 				AddLog("正在启动12306程序");
 				RunManager.Open12306(MainActivity.this);
-				AddLog("启动12306程序完成"); 
+				AddLog("启动12306程序完成");
 			}
 			if (msg.what == 1104) {
 				RunManager.Close12306(MainActivity.this);
 			}
 
 			if (msg.what == 1101) {
-				AddLog("匹配libauthjni.so文件大小");
-				FileCompare c = new FileCompare();
-				if (c.Compare() == false) {
+				AddLog("匹配libauthjni.so文件大小"); 
+				if (FileCompare.Compare() == false) {
 					AddLog("当前出现文件不匹配", true);
 					try {
 						AddLog("正在替换文件", true);
@@ -407,46 +423,23 @@ public class MainActivity extends Activity {
 		}
 	};
 
-	private void CopyLibauthjniFile() throws IOException {
-
-		try {
-			Runtime.getRuntime().exec(
-					"chmod 777 " + FileCommon.GetOldFileName());
-			AddLog("提升libauthjni.so权限成功", true);
-
-			AddLog("更新libauthjni.so文件完成", true);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		FileCommon.CopyFile(FileCommon.Getlibauthjni_oldName(),
-				FileCommon.GetCopyFileName());
-		AddLog("备份libauthjni.so文件副本到libauthjni_old.so完成", true);
-
-		FileCommon.CopyFile(FileCommon.GetlibauthjniName(),
-				FileCommon.GetOldFileName());
-
-	}
-
+	/**
+	 * 重启12306程序
+	 */
 	private void Restart12306() {
-		AddLog("关闭12306程序", true); 
+		AddLog("关闭12306程序", true);
 		moveTaskToFront();
-
 		Thread th = new Thread() {
 			@Override
-			public void run() 
-			{
+			public void run() {
 				// TODO Auto-generated method stub
 				try {
 					Thread.sleep(2000);
-				}
-				catch (InterruptedException e)
-				{
+				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
- 
+
 				if (MainActivity.this.updateThread.isRun()
 						|| MainActivity.this.isRun) {
 					Message msg1 = new Message();
@@ -465,7 +458,7 @@ public class MainActivity extends Activity {
 					msg.what = 1103;
 					MainActivity.this.excuteUpdateHandler.sendMessage(msg);
 				}
-				MainActivity.this.isRun=false;
+				MainActivity.this.isRun = false;
 			}
 		};
 
@@ -473,14 +466,12 @@ public class MainActivity extends Activity {
 
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-
-		return false;
-	}
-
-	private boolean isForeground(String packageName) {
+	/**
+	 * 判断一个进程是否在前段显示
+	 * @param packageName
+	 * @return
+	 */
+	private boolean IsForeground(String packageName) {
 		ActivityManager.RunningAppProcessInfo processInfo = new ProcessManager()
 				.GetProcess(packageName, this);
 		if (processInfo != null) {
@@ -489,6 +480,10 @@ public class MainActivity extends Activity {
 		return false;
 	}
 
+	/**
+	 * 将指定的进程显示到前端
+	 * @return
+	 */
 	@SuppressLint("NewApi")
 	private boolean moveTaskToFront() {
 		ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -497,6 +492,6 @@ public class MainActivity extends Activity {
 		} else {
 
 		}
-		return isForeground(getPackageName());
+		return IsForeground(getPackageName());
 	}
 }

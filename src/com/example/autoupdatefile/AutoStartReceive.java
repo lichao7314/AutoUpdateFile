@@ -5,7 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class FBBroadcastReceive extends BroadcastReceiver {
+/**
+ * 开机启动广播
+ * 
+ * @author lichao
+ * 
+ */
+public class AutoStartReceive extends BroadcastReceiver {
 
 	public final static String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
 
@@ -21,5 +27,5 @@ public class FBBroadcastReceive extends BroadcastReceiver {
 				Log.v("OnOffServices", "FBBroadcastReceive startactivity");
 			}
 		}
-	} 
+	}
 }

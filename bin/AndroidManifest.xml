@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.example.autoupdatefile.FBBroadcastReceive" >
+        <receiver android:name="com.example.autoupdatefile.AutoStartReceive" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 

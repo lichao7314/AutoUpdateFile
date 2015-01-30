@@ -1,7 +1,5 @@
 package com.example.autoupdatefile.ui;
 
- 
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -35,8 +33,9 @@ public class MessageDialog {
 					}
 				}).show();
 	}
-	
-	public static void Alert(String message, Activity a,  DialogInterface.OnClickListener click) {
+
+	public static void Alert(String message, Activity a,
+			DialogInterface.OnClickListener click) {
 		new AlertDialog.Builder(a).setTitle("提示").setMessage(message)
 				.setNegativeButton("关闭", click).show();
 	}
@@ -54,13 +53,13 @@ public class MessageDialog {
 					}
 				}).show();
 	}
-	
+
 	public static AlertDialog Confirm(String message, Context context,
-			DialogInterface.OnClickListener click,  DialogInterface.OnClickListener cancle) {
+			DialogInterface.OnClickListener click,
+			DialogInterface.OnClickListener cancle) {
 		return new AlertDialog.Builder(context).setTitle("确认")
 				.setMessage(message).setPositiveButton("确定", click)
 				.setNegativeButton("取消", cancle).show();
 	}
 
-	 
 }

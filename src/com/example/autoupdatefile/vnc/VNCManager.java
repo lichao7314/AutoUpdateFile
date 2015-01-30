@@ -3,7 +3,7 @@ package com.example.autoupdatefile.vnc;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.example.autoupdatefile.file.FileCommon;
+import com.example.autoupdatefile.file.FileCommonLib;
 
 import android.app.Activity;
 import android.content.Context;
@@ -42,7 +42,7 @@ public class VNCManager {
 
 			OutputStream os = sh.getOutputStream();
 
-			String path = FileCommon.GetFilesDir(a) + "/smartvncserver"; 
+			String path = FileCommonLib.GetFilesDir(a) + "/smartvncserver"; 
 			
 			Process value = writeCommand(os, "chmod 777 " + path);
 

@@ -3,7 +3,12 @@ package com.example.autoupdatefile;
 import android.os.Handler;
 import android.os.Message;
 
-public class FileUpdateThread {
+/**
+ * 检查任务线程
+ * @author lichao
+ *
+ */
+public class CheckTaskThread {
 	private boolean isRun = false;
 
 	private Handler currentHander = null;

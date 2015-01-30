@@ -7,11 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
-public class FileCommon {
+public class FileCommonLib {
 
 	/**
 	 * 获取历史就文件的文件名
@@ -23,7 +24,7 @@ public class FileCommon {
 
 		for (int i = 1; i <= 10; i++) {
 			dataRoot = dataRoot + "/app-lib/com.MobileTicket-" + i + "/";
-			if (FileCommon.ExistFile(dataRoot)) {
+			if (FileCommonLib.ExistFile(dataRoot)) {
 				return dataRoot + "libauthjni.so";
 			}
 		} 
@@ -40,7 +41,7 @@ public class FileCommon {
 
 		for (int i = 1; i <= 10; i++) {
 			dataRoot = dataRoot + "/app-lib/com.MobileTicket-" + i + "/";
-			if (FileCommon.ExistFile(dataRoot)) {
+			if (FileCommonLib.ExistFile(dataRoot)) {
 				return dataRoot + "libauthjni_old.so";
 			}
 		}
@@ -168,5 +169,32 @@ public class FileCommon {
 		Runtime.getRuntime().exec("su");
 		Runtime.getRuntime().exec("adb push " + fromFile + " " + toFile);
 		return 1;
+	}
+	
+	/**
+	 * 从raw目录复制文件到对应的路径中
+	 * 
+	 * @param id
+	 * @param path
+	 * @return
+	 */
+	public static boolean CopyBinary(int id, String path,Activity s) {
+		try { 
+			InputStream ins = s.getApplication().getResources()
+					.openRawResource(id);
+			int size = ins.available();
+
+			// Read the entire resource into a local byte buffer.
+			byte[] buffer = new byte[size];
+			ins.read(buffer);
+			ins.close();
+
+			FileOutputStream fos = new FileOutputStream(path);
+			fos.write(buffer);
+			fos.close();
+			return true;
+		} catch (Exception e) {
+			return false;
+		} 
 	}
 }
