@@ -1,15 +1,16 @@
-package com.example.autoupdatefile;
+package com.example.autoupdatefile.vnc;
 
 import java.io.IOException;
 import java.io.OutputStream;
+
+import com.example.autoupdatefile.file.FileCommon;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
 public class VNCManager {
-	public void Start(Context a) 
-	{
+	public void Start(Context a) {
 		Process sh;
 		String password = "fangbian";
 		String password_check = "";
@@ -36,17 +37,19 @@ public class VNCManager {
 		}
 		String port_string = "-P " + port;
 
-		try {
+		try { 
 			sh = Runtime.getRuntime().exec("su");
 
 			OutputStream os = sh.getOutputStream();
 
-			String path = FileCommon.GetFilesDir(a) + "/smartvncserver";
-
+			String path = FileCommon.GetFilesDir(a) + "/smartvncserver"; 
+			
 			Process value = writeCommand(os, "chmod 777 " + path);
 
 			value = writeCommand(os, path + " -r 0 -s 100 -P 5900 ");
-		} catch (IOException e) {
+			os.close();
+		} catch (IOException e) 
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -55,7 +58,7 @@ public class VNCManager {
 		}
 		Log.v("smartvncserver", "Æô¶¯vnc");
 	}
-	
+
 	public static Process writeCommand(OutputStream os, String command)
 			throws Exception {
 		Process sh = null;

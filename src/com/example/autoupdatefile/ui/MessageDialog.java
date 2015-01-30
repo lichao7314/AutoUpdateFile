@@ -1,4 +1,4 @@
-package com.example.autoupdatefile;
+package com.example.autoupdatefile.ui;
 
  
 

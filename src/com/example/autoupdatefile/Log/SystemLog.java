@@ -1,4 +1,4 @@
-package com.example.autoupdatefile;
+package com.example.autoupdatefile.Log;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,10 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.example.autoupdatefile.file.FileCommon;
+
 import android.os.Environment;
 import android.util.Log;
 
-public class MyLog {  
+public class SystemLog {  
     private static Boolean MYLOG_SWITCH=true; // 日志文件总开关  
     private static Boolean MYLOG_WRITE_TO_FILE=true;// 日志写入文件开关  
     private static char MYLOG_TYPE='v';// 输入日志类型，w代表只输出告警信息等，v代表输出所有信息  

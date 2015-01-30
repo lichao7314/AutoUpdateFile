@@ -1,4 +1,4 @@
-package com.example.autoupdatefile;
+package com.example.autoupdatefile.file;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,9 +26,7 @@ public class FileCommon {
 			if (FileCommon.ExistFile(dataRoot)) {
 				return dataRoot + "libauthjni.so";
 			}
-		}
-		// /data/app-lib/com.MobileTicket-1
-
+		} 
 		return dataRoot + "/data/com.MobileTicket/lib/libauthjni.so";
 	}
 
@@ -107,7 +105,10 @@ public class FileCommon {
 		return dataRoot;
 	}
 	
-	public static String GetFilesDir(Context context){
+	public static String GetFilesDir(Context context) {
+		// String dataRoot = Environment.getDataDirectory().getAbsolutePath();
+		// return dataRoot;
+
 		return context.getFilesDir().getAbsolutePath();
 	}
 

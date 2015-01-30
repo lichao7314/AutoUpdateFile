@@ -14,6 +14,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.example.autoupdatefile.Log.SystemLog;
+import com.example.autoupdatefile.file.FileCommon;
+import com.example.autoupdatefile.file.FileCompare;
+import com.example.autoupdatefile.ui.MessageDialog;
+import com.example.autoupdatefile.vnc.VNCManager;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,7 +51,9 @@ public class MainActivity extends Activity {
 	Button stopBtn = null;
 
 	int count = 0;
-
+ 
+	boolean isRun=false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,8 +85,10 @@ public class MainActivity extends Activity {
 						// TODO Auto-generated method stub
 						try {
 							AddLog("手动强制替换libauthjni_old和libauthjni文件", true);
+							MainActivity.this.isRun=true;
 							CopyLibauthjniFile();
 							Restart12306();
+							
 						} catch (IOException e1) {
 							// TODO Auto-generated catch block
 							AddLog("ROOT权限失败", true);
@@ -105,6 +115,7 @@ public class MainActivity extends Activity {
 				new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
+						MainActivity.this.isRun=true;
 						AddLog("正在生成servcfg.txt文件", true);
 						BulidServcfgFile();
 						AddLog("生成servcfg.txt成功", true);
@@ -143,13 +154,18 @@ public class MainActivity extends Activity {
 			fi.delete();
 		}
 
-		path = FileCommon.GetDataRoot() + "/fangbian";
+		path = FileCommon.GetSDRoot() + "/fangbian";
 		fi = new File(path);
 		if (!fi.exists()) {
-			fi.mkdir();
+			fi.mkdirs();
 		}
 
+		
 		path = FileCommon.GetFilesDir(this) + "/smartvncserver";
+		fi = new File(path);
+		if (fi.exists() && fi.isDirectory()) {
+			fi.delete();
+		}
 
 		fi = new File(path);
 
@@ -250,6 +266,15 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		Stop();
+		super.onDestroy();
+	}
+
+ 
+
 	@SuppressLint("ResourceAsColor")
 	public void AddLog(String log, boolean isWrite) {
 		LinearLayout panel = (LinearLayout) this.findViewById(R.id.panel);
@@ -275,7 +300,7 @@ public class MainActivity extends Activity {
 
 		panel.addView(view);
 		if (isWrite) {
-			MyLog.w("监控", log);
+			SystemLog.w("监控", log);
 		}
 	}
 
@@ -346,12 +371,11 @@ public class MainActivity extends Activity {
 				stopBtn.setEnabled(false);
 			}
 
-			if (msg.what == 1103) {
-
+			if (msg.what == 1103) 
+			{ 
 				AddLog("正在启动12306程序");
 				RunManager.Open12306(MainActivity.this);
-				AddLog("启动12306程序完成");
-
+				AddLog("启动12306程序完成"); 
 			}
 			if (msg.what == 1104) {
 				RunManager.Close12306(MainActivity.this);
@@ -406,34 +430,42 @@ public class MainActivity extends Activity {
 	}
 
 	private void Restart12306() {
-		AddLog("关闭12306程序", true);
-
+		AddLog("关闭12306程序", true); 
 		moveTaskToFront();
 
 		Thread th = new Thread() {
 			@Override
-			public void run() {
+			public void run() 
+			{
 				// TODO Auto-generated method stub
 				try {
 					Thread.sleep(2000);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e)
+				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				Message msg1 = new Message();
-				msg1.what = 1104;
-				MainActivity.this.excuteUpdateHandler.sendMessage(msg1);
-
+ 
+				if (MainActivity.this.updateThread.isRun()
+						|| MainActivity.this.isRun) {
+					Message msg1 = new Message();
+					msg1.what = 1104;
+					MainActivity.this.excuteUpdateHandler.sendMessage(msg1);
+				}
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-				Message msg = new Message();
-				msg.what = 1103;
-				MainActivity.this.excuteUpdateHandler.sendMessage(msg);
+				if (MainActivity.this.updateThread.isRun()
+						|| MainActivity.this.isRun) {
+					Message msg = new Message();
+					msg.what = 1103;
+					MainActivity.this.excuteUpdateHandler.sendMessage(msg);
+				}
+				MainActivity.this.isRun=false;
 			}
 		};
 

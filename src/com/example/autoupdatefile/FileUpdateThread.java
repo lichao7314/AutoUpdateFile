@@ -24,9 +24,9 @@ public class FileUpdateThread {
 		this.isRun = isRun;
 	}
 
-	public void Start() {
-		Thread thread = new Thread(new Runnable() {
-
+	public void Start() 
+	{
+		Thread thread = new Thread(new Runnable() { 
 			@Override
 			public void run() {
 				while (isRun) {
@@ -36,15 +36,15 @@ public class FileUpdateThread {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					Message msg = new Message();
-					msg.what = 1101;
-					currentHander.sendMessage(msg);
-				}
-
+					if (isRun) {
+						Message msg = new Message();
+						msg.what = 1101;
+						currentHander.sendMessage(msg);
+					}
+				} 
 				Message msg1 = new Message();
 				msg1.what = 1102;
-				currentHander.sendMessage(msg1);
-
+				currentHander.sendMessage(msg1); 
 			}
 		});
 		thread.start();

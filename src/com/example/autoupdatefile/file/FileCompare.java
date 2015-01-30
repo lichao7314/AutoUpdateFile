@@ -1,4 +1,4 @@
-package com.example.autoupdatefile;
+package com.example.autoupdatefile.file;
 
 import java.io.File;
 import java.io.FileInputStream;

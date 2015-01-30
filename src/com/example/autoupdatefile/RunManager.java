@@ -8,6 +8,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+/**
+ * 12306运行情况管理
+ * 
+ * @author lichao
+ * 
+ */
 public class RunManager {
 
 	/**
